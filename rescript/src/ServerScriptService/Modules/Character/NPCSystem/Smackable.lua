@@ -1,16 +1,21 @@
 -- feeshiest
 local CollectionService = game:GetService("CollectionService")
-local BaseNPC, RagdollService, NetworkService =
+local BaseNPC, RagdollService, NetworkService, ServerData, GameSettings =
 	require(script.Parent),
 	require(game.ReplicatedStorage.Modules.Character.Ragdoll),
-	require(game.ReplicatedStorage.Modules.Backend.Network)
+	require(game.ReplicatedStorage.Modules.Backend.Network),
+	require(game.ServerScriptService.Modules.System.Server.ServerData),
+	require(game.ServerScriptService.Modules.System.GameSettings)
 
 local SmackableNPC = setmetatable({}, BaseNPC)
 SmackableNPC.__index = SmackableNPC
-SmackableNPC.NPC_ID = "Feeshiest"
+SmackableNPC.NPC_ID = "Smackable"
 
 function SmackableNPC.__init()
-	for _, v in ipairs(CollectionService:GetTagged(SmackableNPC.NPC_ID)) do
+	for _, v in ipairs(CollectionService:GetTagged(BaseNPC.NPC_TAG)) do
+		if v:GetAttribute("NPCType") ~= SmackableNPC.NPC_ID then
+			continue
+		end
 		if not v:IsDescendantOf(workspace) then
 			v = v:Clone()
 			v.Parent = workspace
@@ -22,26 +27,64 @@ end
 
 function SmackableNPC.new(model)
 	RagdollService:SetupModel(model)
-	local npc = setmetatable(BaseNPC.new(model), SmackableNPC)
+	local self = setmetatable(BaseNPC.new(model), SmackableNPC)
 
-	npc.Debounce = false
-	npc.Cooldown = 0.05
-	npc.ClickDetector = model.Hitbox.ClickDetector
+	self.Debounce = false
+	self.Cooldown = 0.05
 
-	npc.ClickDetector.MouseClick:Connect(function(player)
-		npc:OnClick(npc, player)
+	local hitbox = SmackableNPC.Hitbox(self)
+	self.ClickDetector = hitbox:FindFirstChild("ClickDetector") or Instance.new("ClickDetector")
+	self.ClickDetector.Parent = hitbox
+
+	self.ClickDetector.MouseClick:Connect(function(player)
+		self:OnClick(self, player)
 	end)
 
-	return npc
+	return self
 end
 
-function SmackableNPC:OnClick(npc)
+function SmackableNPC.Hitbox(npc)
+	if not npc.Character then
+		return
+	end
+
+	if npc.Character:FindFirstChild("Hitbox") then
+		return npc.Character.Hitbox
+	end
+
+	local hitbox = Instance.new("Part")
+	hitbox.Name = "Hitbox"
+	hitbox.Parent = npc.Character
+
+	hitbox.Size = Vector3.new(5, 7, 4)
+	hitbox.CFrame = npc.Character:GetPrimaryPartCFrame()
+	hitbox.Color = Color3.new(1, 0, 0)
+	hitbox.Transparency = 1
+
+	hitbox.Massless = true
+	hitbox.CanCollide = false
+	hitbox.CanTouch = false
+	hitbox.AudioCanCollide = false
+
+	local weld = Instance.new("WeldConstraint")
+	weld.Parent = hitbox
+	weld.Part0 = hitbox
+	weld.Part1 = npc.Character.Torso
+
+	return hitbox
+end
+
+function SmackableNPC.OnClick(npc)
 	if npc.Debounce then
 		return
 	end
 
 	npc.Debounce = true
 	NetworkService:Fire(nil, "SmackedNPC", npc.Character)
+
+	if npc.Character:GetAttribute("Dropper") then
+		ServerData:SetDataValue("Cash", ServerData.Data.Cash + 1 * GameSettings.Multipliers.Cash)
+	end
 
 	local hrp = npc.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then
