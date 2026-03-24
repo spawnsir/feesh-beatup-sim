@@ -6,7 +6,8 @@ NPCSystem.AllNPCs = {}
 function NPCSystem.new(model)
 	local self = setmetatable({}, NPCSystem)
 	self.Character = model
-	self.State = "Normal"
+	self.State = "" --TODO: state system
+ self.Attributes = model:GetAttributes()
 
 	print("npc created", model)
 
@@ -18,8 +19,8 @@ function NPCSystem.new(model)
 	return self
 end
 
-function NPCSystem:MoveTo(targetPosition)
-	self.Humanoid:MoveTo(targetPosition)
+function NPCSystem:MoveTo(pos)
+	self.Humanoid:MoveTo(pos)
 end
 
 return NPCSystem
