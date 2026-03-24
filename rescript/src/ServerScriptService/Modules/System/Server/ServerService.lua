@@ -4,8 +4,8 @@ local ServerService = {}
 ServerService.OwnerJoined = nil
 
 local serverId, ownerId = game.PrivateServerId, game.PrivateServerOwnerId
-local GROUP_ID = 109654349 -- Replace with your group ID
-local RANK_TO_KICK = 253 -- Replace with the rank that should be kicked
+local GROUP_ID = 109654349
+local AUTHORISED_RANK = 254
 
 function ServerService.__init()
 	ServerService.OwnerJoined = serverId == "" or not serverId or ownerId == 0
@@ -28,7 +28,7 @@ function ServerService.KickAllPlayers(message: string?)
 end
 
 Players.PlayerAdded:Connect(function(player)
-	if not player:IsInGroupAsync(GROUP_ID) or player:GetRankInGroupAsync(GROUP_ID) <= RANK_TO_KICK then
+	if player:GetRankInGroupAsync(GROUP_ID) < AUTHORISED_RANK then
 		player:Kick("not authorised,,,, sorry!!")
 	end
 
