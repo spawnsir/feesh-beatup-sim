@@ -7,7 +7,7 @@ function NPCSystem.new(model)
 	local self = setmetatable({}, NPCSystem)
 	self.Character = model
 	self.State = "" --TODO: state system
- self.Attributes = model:GetAttributes()
+	self.Attributes = model:GetAttributes()
 
 	print("npc created", model)
 
