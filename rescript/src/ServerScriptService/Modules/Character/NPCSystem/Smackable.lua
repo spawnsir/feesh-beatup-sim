@@ -32,32 +32,32 @@ function SmackableNPC.new(model)
 	self.Debounce = false
 	self.Cooldown = 0.05
 
-	local hitbox = SmackableNPC.Hitbox(self)
+	local hitbox = SmackableNPC:Hitbox()
 	self.ClickDetector = hitbox:FindFirstChild("ClickDetector") or Instance.new("ClickDetector")
 	self.ClickDetector.Parent = hitbox
 
-	self.ClickDetector.MouseClick:Connect(function(player)
-		self:OnClick(self, player)
+	self.ClickDetector.MouseClick:Connect(function()
+		self:OnClick()
 	end)
 
 	return self
 end
 
-function SmackableNPC.Hitbox(npc)
-	if not npc.Character then
+function SmackableNPC:CreateHitbox()
+	if not self.Character then
 		return
 	end
 
-	if npc.Character:FindFirstChild("Hitbox") then
-		return npc.Character.Hitbox
+	if self.Character:FindFirstChild("Hitbox") then
+		return self.Character.Hitbox
 	end
 
 	local hitbox = Instance.new("Part")
 	hitbox.Name = "Hitbox"
-	hitbox.Parent = npc.Character
+	hitbox.Parent = self.Character
 
 	hitbox.Size = Vector3.new(5, 7, 4)
-	hitbox.CFrame = npc.Character:GetPrimaryPartCFrame()
+	hitbox.CFrame = self.Character:GetPrimaryPartCFrame()
 	hitbox.Color = Color3.new(1, 0, 0)
 	hitbox.Transparency = 1
 
@@ -69,24 +69,24 @@ function SmackableNPC.Hitbox(npc)
 	local weld = Instance.new("WeldConstraint")
 	weld.Parent = hitbox
 	weld.Part0 = hitbox
-	weld.Part1 = npc.Character.Torso
+	weld.Part1 = self.Character.Torso
 
 	return hitbox
 end
 
-function SmackableNPC.OnClick(npc)
-	if npc.Debounce then
+function SmackableNPC:OnClick()
+	if self.Debounce then
 		return
 	end
 
-	npc.Debounce = true
+	self.Debounce = true
 	NetworkService:Fire(nil, "SmackedNPC", npc.Character)
 
 	if npc.Character:GetAttribute("Dropper") then
 		ServerData:SetDataValue("Cash", ServerData.Data.Cash + 1 * GameSettings.Multipliers.Cash)
 	end
 
-	local hrp = npc.Character:FindFirstChild("HumanoidRootPart")
+	local hrp = self.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then
 		local lv = Instance.new("LinearVelocity")
 		local a = hrp:FindFirstChild("RootAttachment") or hrp:FindFirstChild("Attachment") or Instance.new("Attachment")
@@ -102,15 +102,10 @@ function SmackableNPC.OnClick(npc)
 	end
 
 	task.delay(npc.Cooldown, function()
-		npc.Debounce = false
+		self.Debounce = false
 	end)
 
-	if npc.State == "Ragdolled" then
-		return
-	end
-
 	RagdollService:Ragdoll(npc.Character)
-	npc.State = "Ragdolled"
 end
 
 return SmackableNPC
