@@ -1,6 +1,7 @@
 local RunService = game:GetService("RunService")
 
 local ModuleHandler = {}
+ModuleHandler.Cache = {}
 ModuleHandler.RequiringModules = {}
 ModuleHandler.DelayedInits = {}
 ModuleHandler.InitsRan = false
@@ -57,6 +58,7 @@ function ModuleHandler.require(module)
 		end)
 
 		if success then
+		    ModuleHandler.Cache[module.Name] = module
 			print("Loaded module: " .. module.Name)
 			table.remove(ModuleHandler.RequiringModules, table.find(ModuleHandler.RequiringModules, module))
 			if result.__init then
@@ -76,6 +78,10 @@ function ModuleHandler.RunInits()
 	for _, init in pairs(ModuleHandler.DelayedInits) do
 		task.spawn(init)
 	end
+end
+
+function ModuleHandler:Get(name)
+    return self.Cache[name]
 end
 
 return ModuleHandler
