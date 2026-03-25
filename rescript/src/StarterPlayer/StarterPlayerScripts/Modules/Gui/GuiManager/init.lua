@@ -4,7 +4,7 @@ local player = game.Players.LocalPlayer
 local playerGui = nil
 
 function GuiManager.__init()
-	playerGui = player:WaitForChild("PlayerGui")
+	playerGui = player:WaitForChild("PlayerGui", 300)
 	for _, gui in pairs(playerGui:GetChildren()) do
 		print(gui.Name)
 	end

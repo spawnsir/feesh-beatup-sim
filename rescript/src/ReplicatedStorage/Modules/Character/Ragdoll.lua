@@ -1,8 +1,6 @@
-local ragdoller = {}
+local RagdollService = {}
 
-local remote = game.ReplicatedStorage.Events.RagdollEvent
-
-function ragdoller:BuildJoints(model: Model)
+function RagdollService:BuildJoints(model: Model)
 	self:DestroyJoints(model)
 
 	for _, v in pairs(model:GetDescendants()) do
@@ -28,7 +26,7 @@ function ragdoller:BuildJoints(model: Model)
 	end
 end
 
-function ragdoller:DestroyJoints(model: Model)
+function RagdollService:DestroyJoints(model: Model)
 	for _, v in pairs(model:GetDescendants()) do
 		if v:IsA("BallSocketConstraint") or v.Name == "Attachment" then
 			v:Destroy()
@@ -36,7 +34,7 @@ function ragdoller:DestroyJoints(model: Model)
 	end
 end
 
-function ragdoller:BuildCollisions(model: Model)
+function RagdollService:BuildCollisions(model: Model)
 	for _, v in pairs(model:GetChildren()) do
 		if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" and v.Name ~= "Hitbox" then
 			local h = v:Clone()
@@ -54,11 +52,9 @@ function ragdoller:BuildCollisions(model: Model)
 			w.Part1 = h
 		end
 	end
-
-	-- ragdoller:CreateClientRagdoll(model);
 end
 
-function ragdoller:Ragdoll(model: Model, duration: number?)
+function RagdollService:Ragdoll(model: Model, duration: number?)
 	local hum = model:FindFirstChildOfClass("Humanoid")
 	local hrp = model:FindFirstChild("HumanoidRootPart")
 
@@ -83,16 +79,7 @@ function ragdoller:Ragdoll(model: Model, duration: number?)
 	end
 end
 
-function ragdoller:CreateClientRagdoll(model: Model, player: Player?)
-	task.wait()
-	if player then
-		remote:FireClient(player, "CreateRagdoll", model)
-	else
-		remote:FireAllClients("CreateRagdoll", model)
-	end
-end
-
-function ragdoller:Unragdoll(model: Model)
+function RagdollService:Unragdoll(model: Model)
 	local hum = model:FindFirstChildOfClass("Humanoid")
 
 	hum.RequiresNeck = true
@@ -105,7 +92,7 @@ function ragdoller:Unragdoll(model: Model)
 	hum.PlatformStand = false
 end
 
-function ragdoller:EnableCollisions(model: Model, enabled: boolean)
+function RagdollService:EnableCollisions(model: Model, enabled: boolean)
 	for _, v in pairs(model:GetChildren()) do
 		if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" and v.Name ~= "Hitbox" then
 			v.CanCollide = not enabled
@@ -114,7 +101,7 @@ function ragdoller:EnableCollisions(model: Model, enabled: boolean)
 	end
 end
 
-function ragdoller:EnableMotor6D(model: Model, enabled: boolean)
+function RagdollService:EnableMotor6D(model: Model, enabled: boolean)
 	for _, v in pairs(model:GetDescendants()) do
 		if v:IsA("Motor6D") then
 			v.Enabled = enabled
@@ -122,17 +109,17 @@ function ragdoller:EnableMotor6D(model: Model, enabled: boolean)
 	end
 end
 
-function ragdoller:SetupHumanoid(hum: Humanoid)
+function RagdollService:SetupHumanoid(hum: Humanoid)
 	if not hum then
 		return
 	end
 	hum.BreakJointsOnDeath = false
 end
 
-function ragdoller:SetupModel(model: Model)
+function RagdollService:SetupModel(model: Model)
 	local hum = model:FindFirstChildOfClass("Humanoid")
 	self:SetupHumanoid(hum)
 	self:BuildCollisions(model)
 end
 
-return ragdoller
+return RagdollService

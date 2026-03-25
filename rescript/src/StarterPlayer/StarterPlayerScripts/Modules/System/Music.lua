@@ -7,7 +7,7 @@ MusicService.CurrentIndex = nil
 MusicService.SoundInfo = nil
 
 function MusicService.__init()
-	MusicService.Folder = game.ReplicatedStorage:WaitForChild("Assets").Sound
+	MusicService.Folder = game:GetService("ReplicatedStorage"):WaitForChild("Assets").Sound
 	MusicService.BGMPlaylist = MusicService.Folder.Music.BGM:GetChildren()
 	MusicService.CurrentIndex = math.random(1, #MusicService.BGMPlaylist)
 
@@ -15,14 +15,14 @@ function MusicService.__init()
 end
 
 function MusicService:Play()
-	local sound = self.BGMPlaylist[MusicService.CurrentIndex]
+	local bgm = self.BGMPlaylist[MusicService.CurrentIndex]
 
-	if sound then
-		local name = sound.Name
-		sound:Play()
+	if bgm then
+		local name = bgm.Name
+		bgm:Play()
 
 		local success, info = pcall(function()
-			return MarketplaceService:GetProductInfoAsync(string.match(sound.SoundId, "%d+"), Enum.InfoType.Asset)
+			return MarketplaceService:GetProductInfoAsync(string.match(bgm.SoundId, "%d+"), Enum.InfoType.Asset)
 		end)
 		if success then
 			self.SoundInfo = info
@@ -31,7 +31,7 @@ function MusicService:Play()
 
 		print("playing " .. name)
 
-		sound.Ended:Wait()
+		bgm.Ended:Wait()
 		self:Next()
 	end
 end
@@ -39,27 +39,27 @@ end
 function MusicService:PlaySFX(name, parent: Instance?, random: boolean?)
 	random = random or true
 
-	local sound = self.Folder.SFX:WaitForChild(name)
+	local oneshot = self.Folder.SFX:WaitForChild(name)
 
-	if sound then
-		if sound:IsA("Folder") and random then
-			sound = sound:GetChildren()[math.random(1, #sound:GetChildren())]
+	if oneshot then
+		if oneshot:IsA("Folder") and random then
+			oneshot = oneshot:GetChildren()[math.random(1, #oneshot:GetChildren())]
 		end
 
-		if not sound:IsA("Sound") then
+		if not oneshot:IsA("Sound") then
 			return
 		end
 
-		sound = sound:Clone()
+		oneshot = oneshot:Clone()
 
 		if parent then
-			sound.Parent = parent
+			oneshot.Parent = parent
 		end
 
-		sound:Play()
+		oneshot:Play()
 
-		sound.Ended:Wait()
-		sound:Destroy()
+		oneshot.Ended:Wait()
+		oneshot:Destroy()
 	end
 end
 
@@ -88,12 +88,12 @@ function MusicService:PlayByIndex(index)
 		index = #self.BGMPlaylist
 	end
 
-	local sound = self.BGMPlaylist[index]
+	local bgm = self.BGMPlaylist[index]
 
-	if sound then
+	if bgm then
 		self.CurrentIndex = 1
-		sound.Parent = game.Workspace
-		sound:Play()
+		bgm.Parent = game.Workspace
+		bgm:Play()
 
 		self:Play()
 	end

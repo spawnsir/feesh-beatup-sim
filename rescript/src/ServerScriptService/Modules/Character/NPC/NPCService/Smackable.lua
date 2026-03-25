@@ -1,11 +1,13 @@
 -- feeshiest
-local CollectionService = game:GetService("CollectionService")
-local BaseNPC, RagdollService, NetworkService, ServerData, GameSettings =
+local CollectionService, ReplicatedStorage, ServerScriptService =
+	game:GetService("CollectionService"), game:GetService("ReplicatedStorage"), game:GetService("ServerScriptService")
+
+local BaseNPC, RagdollService, NetworkService, Data, GameSettings =
 	require(script.Parent),
-	require(game.ReplicatedStorage.Modules.Character.Ragdoll),
-	require(game.ReplicatedStorage.Modules.Backend.Network),
-	require(game.ServerScriptService.Modules.System.Server.ServerData),
-	require(game.ServerScriptService.Modules.System.GameSettings)
+	require(ReplicatedStorage.Modules.Character.Ragdoll),
+	require(ReplicatedStorage.Modules.Backend.Network),
+	require(ServerScriptService.Modules.System.Server.Data),
+	require(ServerScriptService.Modules.System.GameSettings)
 
 local SmackableNPC = setmetatable({}, BaseNPC)
 SmackableNPC.__index = SmackableNPC
@@ -32,7 +34,7 @@ function SmackableNPC.new(model)
 	self.Debounce = false
 	self.Cooldown = 0.05
 
-	local hitbox = SmackableNPC:Hitbox()
+	local hitbox = self:CreateHitbox()
 	self.ClickDetector = hitbox:FindFirstChild("ClickDetector") or Instance.new("ClickDetector")
 	self.ClickDetector.Parent = hitbox
 
@@ -44,6 +46,7 @@ function SmackableNPC.new(model)
 end
 
 function SmackableNPC:CreateHitbox()
+	print(self.Character)
 	if not self.Character then
 		return
 	end
@@ -80,10 +83,10 @@ function SmackableNPC:OnClick()
 	end
 
 	self.Debounce = true
-	NetworkService:Fire(nil, "SmackedNPC", npc.Character)
+	NetworkService:Fire(nil, "SmackedNPC", self.Character)
 
 	if self.Attributes["Dropper"] then
-		ServerData:SetDataValue("Cash", ServerData.Data.Cash + 1 * GameSettings.Multipliers.Cash)
+		Data:SetDataValue("Cash", Data.Variables.Cash + 1 * GameSettings.Multipliers.Cash)
 	end
 
 	local hrp = self.Character:FindFirstChild("HumanoidRootPart")
@@ -101,11 +104,11 @@ function SmackableNPC:OnClick()
 		game.Debris:AddItem(lv, 0.05)
 	end
 
-	task.delay(npc.Cooldown, function()
+	task.delay(self.Cooldown, function()
 		self.Debounce = false
 	end)
 
-	RagdollService:Ragdoll(npc.Character)
+	self.State:SetState("Ragdoll", self.Character)
 end
 
 return SmackableNPC
