@@ -59,13 +59,13 @@ function ModuleHandler.require(module)
 
 		if success then
 		    ModuleHandler.Cache[module.Name] = module
-			print("Loaded module: " .. module.Name)
+			print('Loaded module: {module.Name}')
 			table.remove(ModuleHandler.RequiringModules, table.find(ModuleHandler.RequiringModules, module))
 			if result.__init then
 				ModuleHandler.DelayedInits[module.Name] = result.__init
 			end
 		else
-			warn("Failed to load module: " .. module.Name .. " - " .. result)
+			warn('Failed to load module: {module.Name} - {result}')
 		end
 	end)
 end
@@ -75,13 +75,35 @@ function ModuleHandler.RunInits()
 		return
 	end
 	ModuleHandler.InitsRan = true
-	for _, init in pairs(ModuleHandler.DelayedInits) do
-		task.spawn(init)
+	for module, init in pairs(ModuleHandler.DelayedInits) do
+	    local yield = ModuleHandler.Cache[module].WaitForModule
+	    if yield then
+	        ModuleHandler:WaitForModule(yield, init)
+	    else
+	        task.spawn(init)
+	    end
 	end
 end
 
 function ModuleHandler:Get(name)
     return self.Cache[name]
+end
+
+function ModuleHandler:WaitForModule(module, callback)
+    local startTime = tick()
+    task.spawn(function()
+        local v = self.Cache[module]
+        while not v do
+            if tick() - startTime >= 5 then
+                warn('wait on {module} timed out :c')
+                return
+            end
+            task.wait()
+            v = self.Cache[module]
+        end
+        
+        callback()
+    end)
 end
 
 return ModuleHandler
