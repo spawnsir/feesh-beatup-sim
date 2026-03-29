@@ -1,24 +1,30 @@
 -- feeshiest
-local CollectionService, ReplicatedStorage, ServerScriptService =
-	game:GetService("CollectionService"), game:GetService("ReplicatedStorage"), game:GetService("ServerScriptService")
+local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
 
-local BaseNPC, RagdollService, NetworkService, Data, GameSettings =
-	require(script.Parent),
-	require(ReplicatedStorage.Modules.Character.Ragdoll),
-	require(ReplicatedStorage.Modules.Backend.Network),
-	require(ServerScriptService.Modules.System.Server.Data),
-	require(ServerScriptService.Modules.System.GameSettings)
+local CollectionService = game:GetService("CollectionService")
+
+local BaseNPC, RagdollService, NetworkService, Data, GameSettings = require(script.Parent)
 
 local SmackableNPC = setmetatable({}, BaseNPC)
 SmackableNPC.__index = SmackableNPC
 SmackableNPC.NPC_ID = "Smackable"
 
 function SmackableNPC.__init()
+	RagdollService, NetworkService, Data, GameSettings =
+		ModuleHandler:Get("Ragdoll"),
+		ModuleHandler:Get("Network"),
+		ModuleHandler:Get("Data"),
+		ModuleHandler:Get("GameSettings")
+end
+
+function SmackableNPC.__start()
 	for _, v in ipairs(CollectionService:GetTagged(BaseNPC.NPC_TAG)) do
 		if v:GetAttribute("NPCType") ~= SmackableNPC.NPC_ID then
 			continue
 		end
-		if not v:IsDescendantOf(workspace) then
+
+		local v2 = workspace:FindFirstChild(v.Name)
+		if not v2 then
 			v = v:Clone()
 			v.Parent = workspace
 		end

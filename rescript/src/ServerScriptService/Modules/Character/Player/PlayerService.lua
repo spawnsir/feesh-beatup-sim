@@ -1,13 +1,17 @@
+local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
+
 local Players = game:GetService("Players")
-local RagdollService, StateManager =
-	require(game:GetService("ReplicatedStorage").Modules.Character.Ragdoll),
-	require(game:GetService("ServerScriptService").Modules.Character.StateManager)
+local RagdollService, StateManager
 
 local PlayerService = {}
 PlayerService.__index = PlayerService
 PlayerService.AllPlayers = {}
 
 function PlayerService.__init()
+	RagdollService, StateManager = ModuleHandler:Get("Ragdoll"), ModuleHandler:Get("StateManager")
+end
+
+function PlayerService.__start()
 	for _, player in pairs(Players:GetPlayers()) do
 		PlayerService.new(player)
 	end

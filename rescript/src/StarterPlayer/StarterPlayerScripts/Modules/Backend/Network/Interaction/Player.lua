@@ -1,19 +1,23 @@
-local NetworkService, MusicService =
-	require(game.ReplicatedStorage.Modules.Backend.Network),
-	require(game:GetService("Players").LocalPlayer.PlayerScripts.Modules.System.Music)
+local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
 
-local Events = {}
+local NetworkService, MusicService
 
-function Events.__init()
+local PlayerEvents = {}
+
+function PlayerEvents.__init()
+	NetworkService, MusicService = ModuleHandler:Get("Network"), ModuleHandler:Get("Music")
+end
+
+function PlayerEvents.__start()
 	NetworkService:OnEvent("Death", function(...)
-		Events:Death(...)
+		PlayerEvents:Death(...)
 	end)
 end
 
-function Events:Death(model)
+function PlayerEvents:Death(model)
 	task.spawn(function()
 		MusicService:PlaySFX("Death", model.HumanoidRootPart)
 	end)
 end
 
-return Events
+return PlayerEvents

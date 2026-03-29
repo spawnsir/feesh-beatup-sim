@@ -1,6 +1,6 @@
-local ProfileStore, ServerService =
-	require(game.ServerScriptService.Packages.ProfileStore),
-	require(game.ServerScriptService.Modules.System.Server.ServerService)
+local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
+
+local ProfileStore, ServerService
 
 local Data = {}
 Data.AllowSaving = true
@@ -13,7 +13,7 @@ Data.Variables = {
 	},
 }
 
-local PlayerStore = ProfileStore.New("PlayerStore", Data.Variables)
+local PlayerStore
 
 local serverId, ownerId = game.PrivateServerId, game.PrivateServerOwnerId
 
@@ -22,6 +22,11 @@ if game:GetService("RunService"):IsStudio() then
 end
 
 function Data.__init()
+	ProfileStore, ServerService = ModuleHandler:Get("ProfileStore"), ModuleHandler:Get("ServerService")
+end
+
+function Data.__start()
+	PlayerStore = ProfileStore.New("PlayerStore", Data.Variables)
 	if serverId == "" or not serverId or ownerId == 0 then
 		warn("no private server, no data save")
 		Data.AllowSaving = false

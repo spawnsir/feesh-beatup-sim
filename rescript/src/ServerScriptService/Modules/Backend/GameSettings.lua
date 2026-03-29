@@ -1,4 +1,6 @@
-local Data = require(game.ServerScriptService.Modules.System.Server.Data)
+local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
+
+local Data
 
 local data = nil
 
@@ -10,6 +12,10 @@ local Settings = {
 }
 
 function Settings.__init()
+	Data = ModuleHandler:Get("Data")
+end
+
+function Settings.__start()
 	task.wait(1)
 	data = Data.Variables
 	if not data then

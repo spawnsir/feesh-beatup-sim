@@ -1,11 +1,15 @@
-local NetworkService, VFXService, MusicService =
-	require(game.ReplicatedStorage.Modules.Backend.Network),
-	require(game:GetService("Players").LocalPlayer.PlayerScripts.Modules.System.VFX),
-	require(game:GetService("Players").LocalPlayer.PlayerScripts.Modules.System.Music)
+local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
+
+local NetworkService, VFXService, MusicService
 
 local NPCEvents = {}
 
 function NPCEvents.__init()
+	NetworkService, VFXService, MusicService =
+		ModuleHandler:Get("Network"), ModuleHandler:Get("VFX"), ModuleHandler:Get("Music")
+end
+
+function NPCEvents.__start()
 	NetworkService:OnEvent("SmackedNPC", function(...)
 		NPCEvents:OnHit(...)
 	end)
