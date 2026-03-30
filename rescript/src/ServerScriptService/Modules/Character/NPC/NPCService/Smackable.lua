@@ -3,18 +3,19 @@ local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler
 
 local CollectionService = game:GetService("CollectionService")
 
-local BaseNPC, RagdollService, NetworkService, Data, GameSettings = require(script.Parent)
+local BaseNPC, RagdollService, NetworkService, Data, GameSettings, Constants = require(script.Parent)
 
 local SmackableNPC = setmetatable({}, BaseNPC)
 SmackableNPC.__index = SmackableNPC
 SmackableNPC.NPC_ID = "Smackable"
 
 function SmackableNPC.__init()
-	RagdollService, NetworkService, Data, GameSettings =
+	RagdollService, NetworkService, Data, GameSettings, Constants =
 		ModuleHandler:Get("Ragdoll"),
 		ModuleHandler:Get("Network"),
 		ModuleHandler:Get("Data"),
-		ModuleHandler:Get("GameSettings")
+		ModuleHandler:Get("GameSettings"),
+		ModuleHandler:Get("Constants")
 end
 
 function SmackableNPC.__start()
@@ -38,7 +39,7 @@ function SmackableNPC.new(model)
 	local self = setmetatable(BaseNPC.new(model), SmackableNPC)
 
 	self.Debounce = false
-	self.Cooldown = 0.05
+	self.Cooldown = Constants.SMACKABLE_COOLDOWN
 
 	local hitbox = self:CreateHitbox()
 	self.ClickDetector = hitbox:FindFirstChild("ClickDetector") or Instance.new("ClickDetector")

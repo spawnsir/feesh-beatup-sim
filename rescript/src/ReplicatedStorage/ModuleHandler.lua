@@ -20,36 +20,37 @@ function ModuleHandler.init()
 
 	if RunService:IsClient() then
 		local player = game:GetService("Players").LocalPlayer
-		ModuleHandler.LoadModules(player.PlayerScripts:WaitForChild("Modules"))
+		ModuleHandler.LoadModules(player.PlayerScripts:WaitForChild("Modules"), "Client")
 	end
 
 	if RunService:IsServer() then
-		ModuleHandler.LoadModules(game:GetService("ServerScriptService").Packages)
-		ModuleHandler.LoadModules(game:GetService("ServerScriptService").Modules)
+		ModuleHandler.LoadModules(game:GetService("ServerScriptService").Packages, "Server")
+		ModuleHandler.LoadModules(game:GetService("ServerScriptService").Modules, "Server")
 	end
 
 	task.delay(15, function()
 		if #ModuleHandler.RequiringModules > 0 then
 			warn("Not all modules have loaded!", ModuleHandler.RequiringModules, "Initialising required modules")
-			ModuleHandler.Start()
+			ModuleHandler.start()
 		end
 	end)
 
 	while #ModuleHandler.RequiringModules > 0 do
 		task.wait()
 	end
-	ModuleHandler.Start()
+	ModuleHandler.start()
 
 	print("modules loaded! ^v^")
 end
 
-function ModuleHandler.LoadModules(modules)
+function ModuleHandler.LoadModules(modules, context: string?)
+	context = context or "Shared"
 	for _, module in pairs(modules:GetDescendants()) do
-		ModuleHandler.require(module)
+		ModuleHandler.require(module, context)
 	end
 end
 
-function ModuleHandler.require(module)
+function ModuleHandler.require(module, context)
 	if not module:IsA("ModuleScript") then
 		return
 	end
@@ -61,7 +62,8 @@ function ModuleHandler.require(module)
 
 		if success then
 			print(`loaded module: {module.Name}`)
-			ModuleHandler.Cache[module.Name] = result
+			ModuleHandler.Cache[context] = ModuleHandler.Cache[context] or {}
+			ModuleHandler.Cache[context][module.Name] = result
 			table.remove(ModuleHandler.RequiringModules, table.find(ModuleHandler.RequiringModules, module))
 		else
 			warn(`failed to load module: {module.Name} - {result}`)
@@ -69,7 +71,7 @@ function ModuleHandler.require(module)
 	end)
 end
 
-function ModuleHandler.Start()
+function ModuleHandler.start()
 	for v, module in pairs(ModuleHandler.Cache) do
 		print(`running init for module: {v}`)
 
@@ -95,12 +97,18 @@ function ModuleHandler.Start()
 	ModuleHandler.HasStarted = true
 end
 
-function ModuleHandler:Get(name)
+function ModuleHandler:Get(name, useContext: boolean?)
+	useContext = useContext or true
 	if not ModuleHandler.HasStarted then
 		warn(`warning: accessing {name} before module loader has started!`)
 	end
 
-	return ModuleHandler.Cache[name]
+	local context = "Shared"
+	if useContext then
+		context = RunService:IsServer() and "Server" or "Client"
+	end
+
+	return ModuleHandler.Cache[context][name] or ModuleHandler.Cache["Shared"][name]
 end
 
 return ModuleHandler

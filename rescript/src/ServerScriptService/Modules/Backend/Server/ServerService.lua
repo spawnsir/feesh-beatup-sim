@@ -1,17 +1,23 @@
+local ModuleHandler = require(game:GetService("ReplicatedStorage"):WaitForChild("ModuleHandler"))
+
 local Players = game:GetService("Players")
 
 local ServerService = {}
 ServerService.OwnerJoined = nil
 
+local Constants
+
 local serverId, ownerId = game.PrivateServerId, game.PrivateServerOwnerId
-local GROUP_ID = 109654349
-local AUTHORISED_RANK = 254
 
 function ServerService.__init()
+	Constants = ModuleHandler:Get("Constants")
+end
+
+function ServerService.__start()
 	ServerService.OwnerJoined = serverId == "" or not serverId or ownerId == 0
 
 	Players.PlayerAdded:Connect(function(player)
-		if player:GetRankInGroupAsync(GROUP_ID) < AUTHORISED_RANK then
+		if player:GetRankInGroupAsync(Constants.GROUP_ID) < Constants.AUTHORISED_RANK then
 			player:Kick("not authorised,,,, sorry!!")
 		end
 
