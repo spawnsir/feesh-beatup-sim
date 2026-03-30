@@ -55,6 +55,7 @@ function PlayerService.SetCharacter(player, character)
 
 	self.Character = character
 	self.Character.Humanoid.Died:Connect(function()
+		print(`{player.Name} has seen the light`)
 		self.State:SetState(StateManager.States.DEAD, self.Character)
 	end)
 end
