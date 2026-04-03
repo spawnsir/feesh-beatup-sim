@@ -27,6 +27,7 @@ end
 
 function Data.__start()
 	PlayerStore = ProfileStore.New("PlayerStore", Data.Variables)
+
 	if serverId == "" or not serverId or ownerId == 0 then
 		warn("no private server, no data save")
 		Data.AllowSaving = false
@@ -57,6 +58,39 @@ function Data.__start()
 		ServerService.KickAllPlayers("profile failed to load, please rejoin! :3")
 	end
 
+	for u, v in pairs(Data.Variables) do
+		if type(v) == "table" then
+			for u2, v2 in pairs(v) do
+				local folder = game.ReplicatedStorage.Stats:FindFirstChild(u)
+				if not folder then
+					folder = Instance.new("Folder")
+					folder.Name = u
+					folder.Parent = game.ReplicatedStorage.Stats
+				end
+
+				local object = folder:FindFirstChild(u2)
+				if not object then
+					object = Instance.new("IntValue")
+					object.Name = u2
+					object.Parent = folder
+				end
+
+				object.Value = v2
+			end
+
+			continue
+		end
+
+		local object = game.ReplicatedStorage.Stats:FindFirstChild(u)
+		if not object then
+			object = Instance.new("IntValue")
+			object.Name = u
+			object.Parent = game.ReplicatedStorage.Stats
+		end
+
+		object.Value = v
+	end
+
 	game:BindToClose(function()
 		Data.Save() -- Save the profile data when the server shuts down
 		Data.Profile:EndSession() -- End the profile session when the server shuts down
@@ -82,6 +116,26 @@ function Data.Reset()
 end
 
 function Data:SetDataValue(key, value)
+	if type(key) == "table" then
+		for i, v in ipairs(key) do
+			self.Variables[i][v] = value
+
+			local folder = game.ReplicatedStorage.Stats:FindFirstChild(i)
+			if not folder then
+				continue
+			end
+
+			local object = folder:FindFirstChild(v)
+			if not object then
+				continue
+			end
+
+			object.Value = value
+		end
+
+		return
+	end
+
 	self.Variables[key] = value
 
 	local object = game.ReplicatedStorage.Stats:FindFirstChild(key)

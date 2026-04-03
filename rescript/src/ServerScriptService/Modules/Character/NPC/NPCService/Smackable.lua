@@ -25,6 +25,7 @@ function SmackableNPC.__start()
 		end
 
 		local v2 = workspace:FindFirstChild(v.Name)
+		print(v.Name, v2)
 		if not v2 then
 			v = v:Clone()
 			v.Parent = workspace

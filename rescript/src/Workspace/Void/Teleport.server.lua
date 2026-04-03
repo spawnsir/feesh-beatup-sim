@@ -1,6 +1,6 @@
-local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
+--local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
 
-local BadgeService = ModuleHandler:Get("BadgeService")
+--local BadgeService = ModuleHandler:Get("BadgeService")
 
 script.Parent.Touched:Connect(function(hit)
 	print(hit)
@@ -21,9 +21,12 @@ script.Parent.Touched:Connect(function(hit)
 		return
 	end
 
+	--[[ 
 	task.spawn(function()
 		for _, player in pairs(game.Players:GetPlayers()) do
 			BadgeService:AwardBadge(player, 331640616438274)
 		end
-	end)
+	end) 
+	]]
+	--
 end)

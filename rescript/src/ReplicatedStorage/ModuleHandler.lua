@@ -8,15 +8,7 @@ ModuleHandler.HasStarted = false
 function ModuleHandler.init()
 	print("loading modulleeess")
 
-	local rs = game:GetService("ReplicatedStorage")
-	local modules = rs:WaitForChild("Modules")
-
-	for _, module in pairs(modules:GetDescendants()) do
-		if module == script then
-			continue
-		end
-		ModuleHandler.require(module)
-	end
+	ModuleHandler.LoadModules(game:GetService("ReplicatedStorage"))
 
 	if RunService:IsClient() then
 		local player = game:GetService("Players").LocalPlayer
@@ -72,26 +64,28 @@ function ModuleHandler.require(module, context)
 end
 
 function ModuleHandler.start()
-	for v, module in pairs(ModuleHandler.Cache) do
-		print(`running init for module: {v}`)
+	for _, context in pairs(ModuleHandler.Cache) do
+		for v, module in pairs(context) do
+			print(`running init for module: {v}`)
 
-		local init = module.__init
-		if not init then
-			continue
+			local init = module.__init
+			if not init then
+				continue
+			end
+
+			task.spawn(init)
 		end
 
-		task.spawn(init)
-	end
+		for v, module in pairs(context) do
+			print(`starting module: {v}`)
 
-	for v, module in pairs(ModuleHandler.Cache) do
-		print(`starting module: {v}`)
+			local start = module.__start
+			if not start then
+				continue
+			end
 
-		local start = module.__start
-		if not start then
-			continue
+			task.spawn(start)
 		end
-
-		task.spawn(start)
 	end
 
 	ModuleHandler.HasStarted = true
