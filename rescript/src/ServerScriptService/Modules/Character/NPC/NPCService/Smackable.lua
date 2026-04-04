@@ -3,18 +3,18 @@ local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler
 
 local CollectionService = game:GetService("CollectionService")
 
-local BaseNPC, RagdollService, NetworkService, Data, GameSettings, Constants = require(script.Parent)
+local BaseNPC, NetworkService, Data, GameSettings, PlayerService, Constants = require(script.Parent)
 
 local SmackableNPC = setmetatable({}, BaseNPC)
 SmackableNPC.__index = SmackableNPC
 SmackableNPC.NPC_ID = "Smackable"
 
 function SmackableNPC.__init()
-	RagdollService, NetworkService, Data, GameSettings, Constants =
-		ModuleHandler:Get("Ragdoll"),
+	NetworkService, Data, GameSettings, PlayerService, Constants =
 		ModuleHandler:Get("Network"),
 		ModuleHandler:Get("Data"),
 		ModuleHandler:Get("GameSettings"),
+		ModuleHandler:Get("PlayerService"),
 		ModuleHandler:Get("Constants")
 end
 
@@ -36,7 +36,6 @@ function SmackableNPC.__start()
 end
 
 function SmackableNPC.new(model)
-	RagdollService:SetupModel(model)
 	local self = setmetatable(BaseNPC.new(model), SmackableNPC)
 
 	self.Debounce = false
@@ -46,8 +45,8 @@ function SmackableNPC.new(model)
 	self.ClickDetector = hitbox:FindFirstChild("ClickDetector") or Instance.new("ClickDetector")
 	self.ClickDetector.Parent = hitbox
 
-	self.ClickDetector.MouseClick:Connect(function()
-		self:OnClick()
+	self.ClickDetector.MouseClick:Connect(function(player)
+		self:OnClick(player)
 	end)
 
 	return self
@@ -85,8 +84,9 @@ function SmackableNPC:CreateHitbox()
 	return hitbox
 end
 
-function SmackableNPC:OnClick()
-	if self.Debounce then
+function SmackableNPC:OnClick(player)
+	player = PlayerService.GetPlayer(player.UserId)
+	if self.Debounce or player.State.CurrentState == "Dead" then
 		return
 	end
 

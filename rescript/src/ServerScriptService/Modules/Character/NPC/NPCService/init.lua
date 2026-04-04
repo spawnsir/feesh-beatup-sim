@@ -1,6 +1,6 @@
 local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
 
-local StateManager
+local StateManager, RagdollService
 
 local NPCService = {}
 NPCService.__index = NPCService
@@ -8,7 +8,7 @@ NPCService.NPC_TAG = "NPC"
 NPCService.AllNPCs = {}
 
 function NPCService.__init()
-	StateManager = ModuleHandler:Get("StateManager")
+	StateManager, RagdollService = ModuleHandler:Get("StateManager"), ModuleHandler:Get("Ragdoll")
 
 	for _, v in ipairs(game:GetService("CollectionService"):GetTagged(NPCService.NPC_TAG)) do
 		local v2 = workspace:FindFirstChild(v.Name)
@@ -22,6 +22,8 @@ function NPCService.__init()
 end
 
 function NPCService.new(model)
+	RagdollService:SetupModel(model)
+
 	local self = setmetatable({}, NPCService)
 
 	self.Character = model

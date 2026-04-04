@@ -7,17 +7,25 @@ local PlayerService = {}
 PlayerService.__index = PlayerService
 PlayerService.AllPlayers = {}
 
+function PlayerService.SetupPlayer(player)
+	PlayerService.new(player)
+	player.CharacterAdded:Connect(function(character)
+		PlayerService.GetPlayer(player.UserId).State:SetState(StateManager.States.IDLE)
+		PlayerService.SetCharacter(player, character)
+	end)
+end
+
 function PlayerService.__init()
 	RagdollService, StateManager = ModuleHandler:Get("Ragdoll"), ModuleHandler:Get("StateManager")
 end
 
 function PlayerService.__start()
 	for _, player in pairs(Players:GetPlayers()) do
-		PlayerService.new(player)
+		PlayerService.SetupPlayer(player)
 	end
 
 	Players.PlayerAdded:Connect(function(player)
-		PlayerService.new(player)
+		PlayerService.SetupPlayer(player)
 	end)
 
 	Players.PlayerRemoving:Connect(function(player)
@@ -40,14 +48,19 @@ function PlayerService.new(player)
 	return self
 end
 
-function PlayerService.GetPlayer(player)
+function PlayerService.GetPlayer(id)
+	local player = Players:GetPlayerByUserId(id)
+	if not player then
+		return
+	end
+
 	return PlayerService.AllPlayers[player]
 end
 
 function PlayerService.SetCharacter(player, character)
 	RagdollService:SetupModel(character)
 
-	local self = PlayerService.GetPlayer(player)
+	local self = PlayerService.GetPlayer(player.UserId)
 	if not self then
 		warn(`player {player.Name} not found in player manager!`)
 		return
@@ -55,7 +68,6 @@ function PlayerService.SetCharacter(player, character)
 
 	self.Character = character
 	self.Character.Humanoid.Died:Connect(function()
-		print(`{player.Name} has seen the light`)
 		self.State:SetState(StateManager.States.DEAD, self.Character)
 	end)
 end
