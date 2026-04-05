@@ -23,22 +23,22 @@ end
 
 function StateManager.__start()
 	StateManager.Callbacks = {
-		[StateManager.States.IDLE] = function(...)
+		[StateManager.States.IDLE] = function(character)
 			if StateManager.CurrentState ~= StateManager.States.RAGDOLL then
 				return
 			end
-			RagdollService:Unragdoll(...)
+			RagdollService:Unragdoll(character)
 		end,
 
-		[StateManager.States.RAGDOLL] = function(...)
-			RagdollService:Ragdoll(...)
+		[StateManager.States.RAGDOLL] = function(character)
+			RagdollService:Ragdoll(character)
 		end,
 
-		[StateManager.States.DEAD] = function(...)
-			RagdollService:Ragdoll(...)
+		[StateManager.States.DEAD] = function(character)
+			RagdollService:Ragdoll(character)
 
-			print(`{...} has seen the light`)
-			NetworkService:Fire(nil, "Death", ...)
+			print(`{character} has seen the light`)
+			NetworkService:Fire(nil, "PlaySFX", character, "Death", true)
 		end,
 	}
 end
@@ -47,19 +47,18 @@ function StateManager.new()
 	local self = setmetatable({}, StateManager)
 
 	self.CurrentState = StateManager.States.IDLE
-	self.Cooldowns = {}
 
 	return self
 end
 
 function StateManager:SetState(state, ...)
-	local ability = AbilitySystem:GetAbility(state)
-	if ability and (not self.Cooldowns[state] or self.Cooldowns[state] == false) then
-		AbilitySystem:UseAbility(state, ...)
+	if self.Callbacks[state] then
+		self.Callbacks[state](...)
 	end
 
-	if StateManager.Callbacks[state] then
-		StateManager.Callbacks[state](...)
+	local ability = AbilitySystem:GetAbility(state)
+	if ability then
+		AbilitySystem:UseAbility(state, ...)
 	end
 
 	self.CurrentState = state

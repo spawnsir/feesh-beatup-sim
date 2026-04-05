@@ -91,7 +91,7 @@ function SmackableNPC:OnClick(player)
 	end
 
 	self.Debounce = true
-	NetworkService:Fire(nil, "SmackedNPC", self.Character)
+	NetworkService:Fire(nil, "Smack", self.Character)
 
 	if self.Attributes["Dropper"] then
 		Data:SetDataValue("Cash", Data.Variables.Cash + 1 * GameSettings.Multipliers.Cash)

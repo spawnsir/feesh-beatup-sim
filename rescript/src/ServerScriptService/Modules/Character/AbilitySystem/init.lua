@@ -26,19 +26,28 @@ end
 function AbilitySystem:UseAbility(name, player, ...)
 	local ability = self:GetAbility(name)
 
-	if not ability or player.State.Cooldowns[name] then
+	if not ability then
 		return
 	end
 
 	print(`using ability: {name}`)
 	if ability.Cooldown then
-		player.State.Cooldowns[name] = true
+		player.Debounces[name] = true
 		task.delay(ability.Cooldown, function()
-			player.State.Cooldowns[name] = false
+			player.Debounces[name] = false
 		end)
 	end
 
 	ability.Activate(player, ...)
+end
+
+function AbilitySystem.CanUse(state)
+	print(state)
+	if state == "Dead" or state == "Ragdoll" then
+		return
+	end
+
+	return true
 end
 
 return AbilitySystem

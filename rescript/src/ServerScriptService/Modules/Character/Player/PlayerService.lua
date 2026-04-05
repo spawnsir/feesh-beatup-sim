@@ -38,6 +38,7 @@ function PlayerService.new(player)
 
 	self.State = StateManager.new()
 	self.Attributes = {}
+	self.Debounces = {}
 
 	print("player added", player)
 
@@ -70,6 +71,10 @@ function PlayerService.SetCharacter(player, character)
 	self.Character.Humanoid.Died:Connect(function()
 		self.State:SetState(StateManager.States.DEAD, self.Character)
 	end)
+end
+
+function PlayerService:IsOnCooldown(input)
+	return self.Debounces[input]
 end
 
 return PlayerService

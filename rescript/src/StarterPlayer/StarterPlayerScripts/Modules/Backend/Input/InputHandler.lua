@@ -1,11 +1,16 @@
 local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
 
-local NetworkService
+local NetworkService, MusicService
 
 local InputHandler = {}
+InputHandler.Callbacks = {
+	Dash = function(...)
+		MusicService:PlaySFX(...)
+	end,
+}
 
 function InputHandler.__init()
-	NetworkService = ModuleHandler:Get("Network")
+	NetworkService, MusicService = ModuleHandler:Get("Network"), ModuleHandler:Get("Music")
 end
 
 function InputHandler.__start()
@@ -19,7 +24,14 @@ function InputHandler:BindInputs()
 		end
 
 		input.Pressed:Connect(function()
-			NetworkService:Fire("Input", input.Name)
+			local invoke = NetworkService:Invoke("Input", input.Name)
+
+			if not invoke[1] or not InputHandler.Callbacks[input.Name] then
+				return
+			end
+
+			table.remove(invoke, 1)
+			InputHandler.Callbacks[input.Name](unpack(invoke))
 		end)
 	end
 end

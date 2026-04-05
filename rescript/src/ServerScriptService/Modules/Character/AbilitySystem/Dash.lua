@@ -1,9 +1,67 @@
+local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
+
+local Constants
+
 local Dash = {
-	Cooldown = 4,
+	Cooldown = nil,
+	SFX = "Dash",
 }
 
+function Dash.__init()
+	Constants = ModuleHandler:Get("Constants")
+end
+
+function Dash.__start()
+	Dash.Cooldown = Constants.DASH_COOLDOWN
+end
+
 function Dash.Activate(player)
-	print("dash")
+	local character = player.Character
+	if not character or not character.PrimaryPart then
+		return
+	end
+
+	local hum = character.Humanoid
+	local root = character.HumanoidRootPart
+
+	local attach = root:FindFirstChild("ForceAttachumment")
+	if not attach then
+		attach = Instance.new("Attachment")
+		attach.Name = "ForceAttachment"
+		attach.Parent = root
+	end
+
+	root.Velocity *= Vector3.new(1, 0, 1)
+	root.RotVelocity *= Vector3.new(1, 0, 1)
+
+	local velocity = Instance.new("LinearVelocity")
+	velocity.Attachment0 = attach
+	velocity.RelativeTo = Enum.ActuatorRelativeTo.World
+	velocity.MaxForce = math.huge
+	velocity.VectorVelocity = root.CFrame.LookVector * Constants.DASH_STRENGTH
+	velocity.Parent = attach.Parent
+
+	if hum.FloorMaterial == Enum.Material.Air then
+		velocity.VectorVelocity += Vector3.new(0, 2, 0)
+	end
+
+	local connect = game:GetService("RunService").Heartbeat:Connect(function()
+		local params = RaycastParams.new()
+		params.IgnoreWater = true
+		local result = workspace:Raycast(root.CFrame.Position, root.CFrame.LookVector * 5, params)
+		if result then
+			velocity:Destroy()
+			root.Anchored = true
+			task.wait(1)
+			root.Anchored = false
+		end
+	end)
+
+	game.Debris:AddItem(velocity, 0.1)
+	task.wait(0.01)
+	game:GetService("RunService").Heartbeat:Wait()
+
+	connect:Disconnect()
 end
 
 return Dash

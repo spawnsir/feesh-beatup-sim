@@ -3,6 +3,9 @@ local Constants = {
 	AUTHORISED_RANK = 254,
 
 	SMACKABLE_COOLDOWN = 0.05,
+
+	DASH_COOLDOWN = 2,
+	DASH_STRENGTH = 100,
 }
 
 return Constants

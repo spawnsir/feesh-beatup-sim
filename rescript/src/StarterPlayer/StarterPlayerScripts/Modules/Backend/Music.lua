@@ -36,10 +36,11 @@ function MusicService:Play()
 	end
 end
 
-function MusicService:PlaySFX(name, parent: Instance?, random: boolean?)
+function MusicService:PlaySFX(name, parent: Instance?, clone: boolean?, random: boolean?)
+	clone = clone or false
 	random = random or true
 
-	local oneshot = self.Folder.SFX:WaitForChild(name)
+	local oneshot = self.Folder.SFX:FindFirstChild(name) or (parent and parent:FindFirstChild(name))
 
 	if oneshot then
 		if oneshot:IsA("Folder") and random then
@@ -50,16 +51,25 @@ function MusicService:PlaySFX(name, parent: Instance?, random: boolean?)
 			return
 		end
 
-		oneshot = oneshot:Clone()
+		if clone then
+			oneshot = oneshot:Clone()
+		end
+
+		local oldParent = oneshot.Parent
 
 		if parent then
 			oneshot.Parent = parent
 		end
 
+		print(`playing sfx: {name}`)
 		oneshot:Play()
 
 		oneshot.Ended:Wait()
-		oneshot:Destroy()
+		oneshot.Parent = oldParent
+
+		if clone then
+			oneshot:Destroy()
+		end
 	end
 end
 

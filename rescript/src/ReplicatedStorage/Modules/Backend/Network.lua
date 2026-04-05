@@ -10,7 +10,7 @@ function Network:OnEvent(name, callback)
 	self.EventListeners[name] = callback
 end
 
-function Network:HandleInvoke(name, callback)
+function Network:OnInvoke(name, callback)
 	self.FunctionListeners[name] = callback
 end
 
@@ -34,7 +34,8 @@ function Network:Invoke(...)
 	if not RunService:IsClient() then
 		return
 	end
-	func:InvokeServer(...)
+
+	return func:InvokeServer(...)
 end
 
 local function routeEvent(v, ...)
@@ -58,7 +59,8 @@ local function routeInvoke(v, ...)
 	if not Network.FunctionListeners[command] then
 		return
 	end
-	Network.FunctionListeners[command](v, unpack(args))
+	local result = table.pack(Network.FunctionListeners[command](v, unpack(args)))
+	return result
 end
 
 if RunService:IsServer() then
