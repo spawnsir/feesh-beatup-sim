@@ -10,13 +10,13 @@ PlayerService.AllPlayers = {}
 function PlayerService.SetupPlayer(player)
 	PlayerService.new(player)
 	player.CharacterAdded:Connect(function(character)
-		PlayerService.GetPlayer(player.UserId).State:SetState(StateManager.States.IDLE)
 		PlayerService.SetCharacter(player, character)
+		PlayerService.GetPlayer(player.UserId).State:SetState(StateManager.States.IDLE)
 	end)
 end
 
 function PlayerService.__init()
-	RagdollService, StateManager = ModuleHandler:Get("Ragdoll"), ModuleHandler:Get("StateManager")
+	RagdollService, StateManager = ModuleHandler:Get("RagdollService"), ModuleHandler:Get("StateManager")
 end
 
 function PlayerService.__start()

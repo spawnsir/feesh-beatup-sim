@@ -2,6 +2,10 @@ local AbilitySystem = {
 	Abilities = {},
 }
 
+local blacklist = {
+	"Ragdoll",
+}
+
 function AbilitySystem.__start()
 	AbilitySystem:GetAbilities()
 end
@@ -38,13 +42,22 @@ function AbilitySystem:UseAbility(name, player, ...)
 		end)
 	end
 
-	ability.Activate(player, ...)
+	ability.Do(player, ...)
 end
 
-function AbilitySystem.CanUse(state)
-	print(state)
-	if state == "Dead" or state == "Ragdoll" then
-		return
+function AbilitySystem.CanUse(state, ability)
+	if table.find(blacklist, state) then
+		return false
+	end
+
+	ability = AbilitySystem:GetAbility(ability)
+	if not ability then
+		return false
+	end
+
+	local callback = ability and ability.CanUse
+	if callback then
+		return callback()
 	end
 
 	return true

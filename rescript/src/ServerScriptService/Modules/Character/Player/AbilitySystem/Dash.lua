@@ -15,7 +15,7 @@ function Dash.__start()
 	Dash.Cooldown = Constants.DASH_COOLDOWN
 end
 
-function Dash.Activate(player)
+function Dash.Do(player)
 	local character = player.Character
 	if not character or not character.PrimaryPart then
 		return
@@ -37,7 +37,7 @@ function Dash.Activate(player)
 	local velocity = Instance.new("LinearVelocity")
 	velocity.Attachment0 = attach
 	velocity.RelativeTo = Enum.ActuatorRelativeTo.World
-	velocity.MaxForce = math.huge
+	velocity.MaxForce = Constants.DASH_STRENGTH * 1000
 	velocity.VectorVelocity = root.CFrame.LookVector * Constants.DASH_STRENGTH
 	velocity.Parent = attach.Parent
 

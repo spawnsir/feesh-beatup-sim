@@ -1,15 +1,12 @@
 -- feeshiest
 local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
 
-local CollectionService = game:GetService("CollectionService")
+local NetworkService, Data, GameSettings, PlayerService, Constants
 
-local BaseNPC, NetworkService, Data, GameSettings, PlayerService, Constants = require(script.Parent)
+local SmackBehaviour = {}
+SmackBehaviour.__index = SmackBehaviour
 
-local SmackableNPC = setmetatable({}, BaseNPC)
-SmackableNPC.__index = SmackableNPC
-SmackableNPC.NPC_ID = "Smackable"
-
-function SmackableNPC.__init()
+function SmackBehaviour.__init()
 	NetworkService, Data, GameSettings, PlayerService, Constants =
 		ModuleHandler:Get("Network"),
 		ModuleHandler:Get("Data"),
@@ -18,24 +15,11 @@ function SmackableNPC.__init()
 		ModuleHandler:Get("Constants")
 end
 
-function SmackableNPC.__start()
-	for _, v in ipairs(CollectionService:GetTagged(BaseNPC.NPC_TAG)) do
-		if v:GetAttribute("Type") ~= SmackableNPC.NPC_ID then
-			continue
-		end
+function SmackBehaviour.new(parent)
+	local self = setmetatable({}, SmackBehaviour)
 
-		if not v:IsDescendantOf(workspace) and not workspace.Map.NPCs:FindFirstChild(v.Name) then
-			v = v:Clone()
-			v.Parent = workspace.Map.NPCs
-		end
-
-		SmackableNPC.new(v)
-	end
-end
-
-function SmackableNPC.new(model)
-	local self = setmetatable(BaseNPC.new(model), SmackableNPC)
-
+	self.Parent = parent
+	self.Character = parent.Character
 	self.Debounce = false
 	self.Cooldown = Constants.SMACKABLE_COOLDOWN
 
@@ -50,7 +34,7 @@ function SmackableNPC.new(model)
 	return self
 end
 
-function SmackableNPC:CreateHitbox()
+function SmackBehaviour:CreateHitbox()
 	print(self.Character)
 	if not self.Character then
 		return
@@ -82,7 +66,7 @@ function SmackableNPC:CreateHitbox()
 	return hitbox
 end
 
-function SmackableNPC:OnClick(player)
+function SmackBehaviour:OnClick(player)
 	player = PlayerService.GetPlayer(player.UserId)
 	if self.Debounce or player.State.CurrentState == "Dead" then
 		return
@@ -91,7 +75,7 @@ function SmackableNPC:OnClick(player)
 	self.Debounce = true
 	NetworkService:Fire(nil, "Smack", self.Character)
 
-	if self.Attributes["Dropper"] then
+	if self.Parent.Attributes["Dropper"] then
 		Data:SetDataValue("Cash", Data.Variables.Cash + 1 * GameSettings.Multipliers.Cash)
 	end
 
@@ -114,7 +98,7 @@ function SmackableNPC:OnClick(player)
 		self.Debounce = false
 	end)
 
-	self.State:SetState("Ragdoll", self.Character)
+	self.Parent.State:SetState("Ragdoll", self.Character)
 end
 
-return SmackableNPC
+return SmackBehaviour

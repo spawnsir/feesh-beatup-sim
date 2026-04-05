@@ -11,7 +11,7 @@ InputEvents.Events = {
 			return false
 		end
 
-		if player:IsOnCooldown(input) or not AbilitySystem.CanUse(player.State.CurrentState) then
+		if player:IsOnCooldown(input) or not AbilitySystem.CanUse(player.State.CurrentState, input) then
 			return false
 		end
 
