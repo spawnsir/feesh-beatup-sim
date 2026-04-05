@@ -20,15 +20,13 @@ end
 
 function SmackableNPC.__start()
 	for _, v in ipairs(CollectionService:GetTagged(BaseNPC.NPC_TAG)) do
-		if v:GetAttribute("NPCType") ~= SmackableNPC.NPC_ID then
+		if v:GetAttribute("Type") ~= SmackableNPC.NPC_ID then
 			continue
 		end
 
-		local v2 = workspace:FindFirstChild(v.Name)
-		print(v.Name, v2)
-		if not v2 then
+		if not v:IsDescendantOf(workspace) and not workspace.Map.NPCs:FindFirstChild(v.Name) then
 			v = v:Clone()
-			v.Parent = workspace
+			v.Parent = workspace.Map.NPCs
 		end
 
 		SmackableNPC.new(v)

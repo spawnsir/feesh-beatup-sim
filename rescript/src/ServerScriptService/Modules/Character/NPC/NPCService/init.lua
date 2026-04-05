@@ -11,10 +11,9 @@ function NPCService.__init()
 	StateManager, RagdollService = ModuleHandler:Get("StateManager"), ModuleHandler:Get("Ragdoll")
 
 	for _, v in ipairs(game:GetService("CollectionService"):GetTagged(NPCService.NPC_TAG)) do
-		local v2 = workspace:FindFirstChild(v.Name)
-		if not v2 then
+		if not v:IsDescendantOf(workspace) and not workspace.Map.NPCs:FindFirstChild(v.Name) then
 			v = v:Clone()
-			v.Parent = workspace
+			v.Parent = workspace.Map.NPCs
 		end
 
 		NPCService.new(v)
@@ -31,6 +30,10 @@ function NPCService.new(model)
 	self.Attributes = model:GetAttributes()
 
 	print("npc created", model)
+
+	if self.Attributes["AvatarId"] then
+		self:ApplyAvatarFromID(self.Attributes["AvatarId"], model)
+	end
 
 	NPCService.AllNPCs[model] = self
 	model.Destroying:Connect(function()
@@ -56,6 +59,16 @@ end
 
 function NPCService:MoveTo(pos)
 	self.Humanoid:MoveTo(pos)
+end
+
+function NPCService:ApplyAvatarFromID(id, model)
+	local humanoid = model:FindFirstChildOfClass("Humanoid")
+	local description = game:GetService("Players"):GetHumanoidDescriptionFromUserId(id)
+	if not humanoid or not description then
+		return
+	end
+
+	humanoid:ApplyDescription(description)
 end
 
 return NPCService
