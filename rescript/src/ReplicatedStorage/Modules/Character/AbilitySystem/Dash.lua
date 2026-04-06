@@ -1,6 +1,6 @@
 local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
 
-local Constants
+local Constants, MusicService
 
 local Dash = {
 	Cooldown = nil,
@@ -9,6 +9,12 @@ local Dash = {
 
 function Dash.__init()
 	Constants = ModuleHandler:Get("Constants")
+
+	if game:GetService("RunService"):IsClient() then
+		MusicService = ModuleHandler:Get("Music")
+	else
+		MusicService = ModuleHandler:Get("MusicServiceServer")
+	end
 end
 
 function Dash.__start()
@@ -23,6 +29,21 @@ function Dash.Do(player)
 
 	local hum = character.Humanoid
 	local root = character.HumanoidRootPart
+
+	task.spawn(function()
+		local args = {
+			Dash.SFX,
+			root,
+			false,
+			false,
+		}
+
+		if game:GetService("RunService"):IsServer() then
+			table.insert(args, character)
+		end
+
+		MusicService:PlaySFX(table.unpack(args))
+	end)
 
 	local attach = root:FindFirstChild("ForceAttachumment")
 	if not attach then
@@ -39,6 +60,7 @@ function Dash.Do(player)
 	velocity.RelativeTo = Enum.ActuatorRelativeTo.World
 	velocity.MaxForce = Constants.DASH_STRENGTH * 1000
 	velocity.VectorVelocity = root.CFrame.LookVector * Constants.DASH_STRENGTH
+	velocity.ForceLimitMode = Enum.ForceLimitMode.Magnitude
 	velocity.Parent = attach.Parent
 
 	if hum.FloorMaterial == Enum.Material.Air then
@@ -58,7 +80,7 @@ function Dash.Do(player)
 	end)
 
 	game.Debris:AddItem(velocity, 0.1)
-	task.wait(0.01)
+	task.wait(0.1)
 	game:GetService("RunService").Heartbeat:Wait()
 
 	connect:Disconnect()

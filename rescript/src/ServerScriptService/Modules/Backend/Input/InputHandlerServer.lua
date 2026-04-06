@@ -4,21 +4,19 @@ local NetworkService, PlayerService, AbilitySystem
 
 local InputEvents = {}
 
-InputEvents.Events = {
-	Input = function(player, input)
-		player = PlayerService.GetPlayer(player.UserId)
-		if not player then
-			return false
-		end
+local function _ability(player, input)
+	player = PlayerService.GetPlayer(player.UserId)
+	if not player or player:IsOnCooldown(input) or not AbilitySystem.CanUse(player.State.CurrentState, input) then
+		return
+	end
 
-		if player:IsOnCooldown(input) or not AbilitySystem.CanUse(player.State.CurrentState, input) then
-			return false
-		end
-
+	task.spawn(function()
 		player.State:SetState(input, player)
+	end)
+end
 
-		return true, AbilitySystem:GetAbility(input).SFX, player.Character.HumanoidRootPart, false
-	end,
+InputEvents.Events = {
+	Input = _ability,
 }
 
 function InputEvents.__init()
@@ -28,7 +26,7 @@ end
 
 function InputEvents.__start()
 	for eventName, callback in pairs(InputEvents.Events) do
-		NetworkService:OnInvoke(eventName, callback)
+		NetworkService:OnEvent(eventName, callback)
 	end
 end
 

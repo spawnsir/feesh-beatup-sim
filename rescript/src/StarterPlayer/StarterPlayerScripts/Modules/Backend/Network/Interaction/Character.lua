@@ -16,9 +16,9 @@ CharacterEvents.Events = {
 		end)
 	end,
 
-	PlaySFX = function(model, sfx, clone: boolean?, random: boolean?)
+	PlaySFX = function(sfx, part, clone: boolean?, random: boolean?)
 		task.spawn(function()
-			MusicService:PlaySFX(sfx, model.HumanoidRootPart, clone, random)
+			MusicService:PlaySFX(sfx, part, clone, random)
 		end)
 	end,
 }

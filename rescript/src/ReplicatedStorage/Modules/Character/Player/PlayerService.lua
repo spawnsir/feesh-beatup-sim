@@ -19,25 +19,10 @@ function PlayerService.__init()
 	RagdollService, StateManager = ModuleHandler:Get("RagdollService"), ModuleHandler:Get("StateManager")
 end
 
-function PlayerService.__start()
-	for _, player in pairs(Players:GetPlayers()) do
-		PlayerService.SetupPlayer(player)
-	end
-
-	Players.PlayerAdded:Connect(function(player)
-		PlayerService.SetupPlayer(player)
-	end)
-
-	Players.PlayerRemoving:Connect(function(player)
-		PlayerService.AllPlayers[player] = nil
-	end)
-end
-
 function PlayerService.new(player)
 	local self = setmetatable({}, PlayerService)
 
 	self.State = StateManager.new()
-	self.Attributes = {}
 	self.Debounces = {}
 
 	print("player added", player)
