@@ -2,7 +2,10 @@ local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler
 
 local NetworkService, PlayerService, AbilitySystem
 
-local InputEvents = {}
+local InputHandler = {}
+InputHandler.Callbacks = {
+	Dash = function() end,
+}
 
 local function _ability(player, input)
 	player = PlayerService.GetPlayer(player.UserId)
@@ -15,19 +18,21 @@ local function _ability(player, input)
 	end)
 end
 
-InputEvents.Events = {
-	Input = _ability,
-}
-
-function InputEvents.__init()
+function InputHandler.__init()
 	NetworkService, PlayerService, AbilitySystem =
 		ModuleHandler:Get("Network"), ModuleHandler:Get("PlayerService"), ModuleHandler:Get("AbilitySystem")
 end
 
-function InputEvents.__start()
-	for eventName, callback in pairs(InputEvents.Events) do
-		NetworkService:OnEvent(eventName, callback)
-	end
+function InputHandler.__start()
+	NetworkService:OnEvent("Input", function(...)
+		_ability(...)
+
+		local callback = InputHandler.Callbacks[select(2, ...)]
+		if not callback then
+			return
+		end
+		callback()
+	end)
 end
 
-return InputEvents
+return InputHandler

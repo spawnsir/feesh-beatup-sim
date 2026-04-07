@@ -2,12 +2,16 @@ local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler
 
 local Players = game:GetService("Players")
 
-local NetworkService
+local NetworkService, MusicServiceShared
 
 local MusicService = {}
 
 function MusicService.__init()
-	NetworkService = ModuleHandler:Get("Network")
+	NetworkService, MusicServiceShared = ModuleHandler:Get("Network"), ModuleHandler:Get("MusicService")
+end
+
+function MusicService.__start()
+	MusicServiceShared:Play()
 end
 
 function MusicService:PlaySFX(name, parent, clone, random, character)

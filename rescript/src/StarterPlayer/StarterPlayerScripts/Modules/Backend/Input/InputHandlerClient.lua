@@ -38,7 +38,12 @@ function InputHandler:BindInputs()
 
 			task.spawn(function()
 				_ability(input.Name)
-				InputHandler.Callbacks[input.Name]()
+
+				local callback = InputHandler.Callbacks[input.Name]
+				if not callback then
+					return
+				end
+				callback()
 			end)
 		end)
 	end

@@ -11,7 +11,7 @@ function Dash.__init()
 	Constants = ModuleHandler:Get("Constants")
 
 	if game:GetService("RunService"):IsClient() then
-		MusicService = ModuleHandler:Get("Music")
+		MusicService = ModuleHandler:Get("MusicService")
 	else
 		MusicService = ModuleHandler:Get("MusicServiceServer")
 	end

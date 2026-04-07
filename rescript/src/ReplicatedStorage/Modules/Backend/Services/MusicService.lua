@@ -10,8 +10,6 @@ function MusicService.__init()
 	MusicService.Folder = game:GetService("ReplicatedStorage"):WaitForChild("Assets").Sound
 	MusicService.BGMPlaylist = MusicService.Folder.Music.BGM:GetChildren()
 	MusicService.CurrentIndex = math.random(1, #MusicService.BGMPlaylist)
-
-	MusicService:Play()
 end
 
 function MusicService:Play()
