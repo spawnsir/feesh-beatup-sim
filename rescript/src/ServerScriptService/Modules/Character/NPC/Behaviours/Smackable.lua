@@ -67,7 +67,7 @@ function SmackBehaviour:CreateHitbox()
 end
 
 function SmackBehaviour:OnClick(player)
-	player = PlayerService.GetPlayer(player.UserId)
+	player = PlayerService.GetPlayer(player.Character)
 	if self.Debounce or player.State.CurrentState == "Dead" then
 		return
 	end

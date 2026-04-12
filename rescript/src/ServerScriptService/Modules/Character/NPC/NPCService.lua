@@ -1,7 +1,7 @@
 local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler)
 local Behaviours = require(script.Parent.Behaviours)
 
-local StateManager, RagdollService
+local StateManager, RagdollService, BaseCharacter
 
 local NPCService = {}
 NPCService.__index = NPCService
@@ -11,10 +11,13 @@ NPCService.AllNPCs = {}
 local behaviours = Behaviours
 
 function NPCService.__init()
-	StateManager, RagdollService = ModuleHandler:Get("StateManager"), ModuleHandler:Get("RagdollService")
+	StateManager, RagdollService, BaseCharacter =
+		ModuleHandler:Get("StateManager"), ModuleHandler:Get("RagdollService"), ModuleHandler:Get("BaseCharacter")
 end
 
 function NPCService.__start()
+	NPCService = setmetatable(NPCService, BaseCharacter)
+
 	for _, v in ipairs(game:GetService("CollectionService"):GetTagged(NPCService.NPC_TAG)) do
 		if not v:IsDescendantOf(workspace) and not workspace.Map.NPCs:FindFirstChild(v.Name) then
 			v = v:Clone()
@@ -28,11 +31,8 @@ end
 function NPCService.new(model)
 	RagdollService:SetupModel(model)
 
-	local self = setmetatable({}, NPCService)
+	local self = setmetatable(BaseCharacter.new(model), NPCService)
 
-	self.Character = model
-	self.State = StateManager.new()
-	self.Attributes = model:GetAttributes()
 	self.Behaviours = self:SetBehaviours(self.Attributes)
 
 	print("npc created", model)

@@ -8,7 +8,7 @@ InputHandler.Callbacks = {
 }
 
 local function _ability(input)
-	local player = PlayerService.GetPlayer(game.Players.LocalPlayer.UserId)
+	local player = PlayerService.GetPlayer(game.Players.LocalPlayer.Character)
 	if not player or player:IsOnCooldown(input) or not AbilitySystem.CanUse(player.State.CurrentState, input) then
 		return
 	end

@@ -2,10 +2,16 @@ local ModuleHandler = require(game:GetService("ReplicatedStorage").ModuleHandler
 
 local Dead = {}
 
-local RagdollService, NetworkService
+local RagdollService, MusicService
 
 function Dead.__init()
-	RagdollService, NetworkService = ModuleHandler:Get("RagdollService"), ModuleHandler:Get("Network")
+	RagdollService = ModuleHandler:Get("RagdollService")
+
+	if game:GetService("RunService"):IsClient() then
+		MusicService = ModuleHandler:Get("MusicService")
+	else
+		MusicService = ModuleHandler:Get("MusicServiceServer")
+	end
 end
 
 function Dead.Do(character)
@@ -16,7 +22,20 @@ function Dead.Do(character)
 	RagdollService:Ragdoll(character)
 
 	print(`{character} has seen the light`)
-	NetworkService:Fire(nil, "PlaySFX", character, "Death", true)
+	task.spawn(function()
+		local args = {
+			"Death",
+			character.HumanoidRootPart,
+			true,
+			false,
+		}
+
+		if game:GetService("RunService"):IsServer() then
+			table.insert(args, character)
+		end
+
+		MusicService:PlaySFX(table.unpack(args))
+	end)
 end
 
 return Dead
